@@ -315,7 +315,7 @@ export default function PropertyDetailPage() {
               <div className="grid grid-cols-2 gap-4">
                 {amenities.map((amenity, index) => (
                   <div key={index} className="flex items-center gap-2">
-                    <CheckCircle2 className="w-5 h-5 text-stone-900 flex-shrink-0" />
+                    <CheckCircle2 className="w-5 h-5 text-stone-900 shrink-0" />
                     <span className="text-sm text-stone-700">{amenity}</span>
                   </div>
                 ))}
@@ -326,7 +326,10 @@ export default function PropertyDetailPage() {
       </section>
 
       {/* ROI Estimator Section */}
-      <ROIEstimator />
+      <ROIEstimator
+        initialPropertyType={property.category}
+        lockPropertyType={true}
+      />
 
       {/* Investment Highlights */}
       <section className="bg-stone-900 text-white py-16">

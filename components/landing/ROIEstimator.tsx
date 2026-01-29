@@ -26,9 +26,19 @@ interface RoiResult {
   disclaimerText?: string;
 }
 
-const ROIEstimator: React.FC = () => {
+interface ROIEstimatorProps {
+  initialPropertyType?: string;
+  lockPropertyType?: boolean;
+}
+
+const ROIEstimator: React.FC<ROIEstimatorProps> = ({
+  initialPropertyType,
+  lockPropertyType = false,
+}) => {
   const [configs, setConfigs] = useState<RoiConfig[]>([]);
-  const [selectedType, setSelectedType] = useState<string>("");
+  const [selectedType, setSelectedType] = useState<string>(
+    initialPropertyType || "",
+  );
   const [investmentAmount, setInvestmentAmount] = useState<number>(1000000);
   const [years, setYears] = useState<number>(10);
   const [result, setResult] = useState<RoiResult | null>(null);
@@ -56,6 +66,13 @@ const ROIEstimator: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    // If initialPropertyType changes, update selectedType
+    if (initialPropertyType) {
+      setSelectedType(initialPropertyType);
+    }
+  }, [initialPropertyType]);
+
+  useEffect(() => {
     if (selectedType) {
       const config = configs.find((c) => c.propertyType === selectedType);
       setSelectedConfig(config || null);
@@ -67,7 +84,7 @@ const ROIEstimator: React.FC = () => {
     try {
       const data = getROIConfigs();
       setConfigs(data);
-      if (data.length > 0) {
+      if (data.length > 0 && !selectedType) {
         setSelectedType(data[0].propertyType);
       }
     } catch (error) {
@@ -112,13 +129,14 @@ const ROIEstimator: React.FC = () => {
   };
 
   const handleSelect = (type: string) => {
+    if (lockPropertyType) return;
     setSelectedType(type);
     setIsDropdownOpen(false);
   };
 
   return (
     <section className="relative w-full h-screen bg-white text-gray-900 overflow-hidden flex items-center">
-      <div className="container mx-auto px-6 md:px-12 max-w-screen-xl h-full max-h-[900px] flex items-center">
+      <div className="container mx-auto px-6 md:px-12 max-w-7xl h-full max-h-[900px] flex items-center">
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
@@ -148,27 +166,31 @@ const ROIEstimator: React.FC = () => {
 
                 {/* Trigger */}
                 <div
-                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="relative w-full border-b border-gray-300 py-2 pr-8 cursor-pointer group hover:border-gray-900 transition-colors"
+                  onClick={() =>
+                    !lockPropertyType && setIsDropdownOpen(!isDropdownOpen)
+                  }
+                  className={`relative w-full border-b border-gray-300 py-2 pr-8 ${lockPropertyType ? "cursor-default" : "cursor-pointer group hover:border-gray-900"} transition-colors`}
                 >
                   <span className="text-xl font-serif text-gray-900 select-none">
                     {selectedType || "Select Asset Type"}
                   </span>
 
                   {/* Chevron */}
-                  <div
-                    className={`absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none transition-transform duration-300 ${
-                      isDropdownOpen ? "rotate-180" : ""
-                    }`}
-                  >
-                    <svg width="10" height="6" viewBox="0 0 12 8" fill="none">
-                      <path
-                        d="M1 1.5L6 6.5L11 1.5"
-                        stroke="#111827"
-                        strokeWidth="1.5"
-                      />
-                    </svg>
-                  </div>
+                  {!lockPropertyType && (
+                    <div
+                      className={`absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none transition-transform duration-300 ${
+                        isDropdownOpen ? "rotate-180" : ""
+                      }`}
+                    >
+                      <svg width="10" height="6" viewBox="0 0 12 8" fill="none">
+                        <path
+                          d="M1 1.5L6 6.5L11 1.5"
+                          stroke="#111827"
+                          strokeWidth="1.5"
+                        />
+                      </svg>
+                    </div>
+                  )}
                 </div>
 
                 {/* Dropdown */}
@@ -305,7 +327,7 @@ const ROIEstimator: React.FC = () => {
                 <img
                   src={selectedConfig.imageUrl}
                   alt={selectedConfig.propertyType}
-                  className="w-full h-full object-cover grayscale-[20%] contrast-[0.95]"
+                  className="w-full h-full object-cover grayscale-20 contrast-[0.95]"
                 />
               ) : (
                 <div className="w-full h-full bg-gray-200" />

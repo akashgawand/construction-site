@@ -127,6 +127,22 @@ export const roiConfigs: ROIConfig[] = [
     imageUrl: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80',
     disclaimerText: 'ROI estimates are illustrative only and not guaranteed. Actual returns may vary.',
   },
+  {
+    id: 5,
+    propertyType: 'Residential',
+    roiPercentageMin: 8.0,
+    roiPercentageMax: 11.0,
+    imageUrl: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80',
+    disclaimerText: 'ROI estimates are illustrative only and not guaranteed. Actual returns may vary.',
+  },
+  {
+    id: 6,
+    propertyType: 'Villa',
+    roiPercentageMin: 9.0,
+    roiPercentageMax: 13.0,
+    imageUrl: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800&q=80',
+    disclaimerText: 'ROI estimates are illustrative only and not guaranteed. Actual returns may vary.',
+  },
 ];
 
 // CTA Section
