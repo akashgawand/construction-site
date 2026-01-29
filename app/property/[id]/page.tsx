@@ -325,14 +325,7 @@ export default function PropertyDetailPage() {
         </div>
       </section>
 
-      {/* ROI Estimator Section */}
-      <ROIEstimator
-        initialPropertyType={property.category}
-        lockPropertyType={true}
-      />
-
-      {/* Investment Highlights */}
-      <section className="bg-stone-900 text-white py-16">
+      <section className="bg-stone-900 text-white mb-15 py-16">
         <div className="container mx-auto px-6 md:px-12 max-w-7xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -359,6 +352,14 @@ export default function PropertyDetailPage() {
           </motion.div>
         </div>
       </section>
+
+      {/* ROI Estimator Section */}
+      <ROIEstimator
+        initialPropertyType={property.category}
+        lockPropertyType={true}
+      />
+
+      {/* Investment Highlights */}
 
       {/* Footer Spacer */}
       <div className="h-16"></div>

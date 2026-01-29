@@ -1,140 +1,184 @@
 "use client";
 
-import React from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { MapPin, ArrowUpRight, Heart } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Minus } from "lucide-react";
 import { type Property } from "@/lib/data";
 
-// Accent color for consistent branding (Amber/Gold)
-const ACCENT_COLOR = "#F59E0B";
-
-interface FeaturedPropertiesProps {
-  properties: Property[];
-}
-
+// ------------------------------------------------------------------
+// COMPONENT: THE ARCHITECTURAL CARD
+// ------------------------------------------------------------------
 const ProjectCard: React.FC<{ property: Property; index: number }> = ({
   property,
   index,
 }) => {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 30 }}
+      initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.5, delay: index * 0.1 }}
-      className="group h-full"
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{
+        duration: 0.8,
+        delay: index * 0.1,
+        ease: [0.21, 0.47, 0.32, 0.98],
+      }}
+      className="group relative flex flex-col h-full select-none" // select-none prevents text highlighting while dragging
     >
-      <Link href={`/property/${property.id}`} className="block h-full">
-        {/* CARD: Enhanced design with better shadows and borders */}
-        <div className="h-full flex flex-col bg-white rounded-2xl overflow-hidden transition-all duration-500 hover:shadow-2xl shadow-md border border-gray-100 hover:border-[#F59E0B]/20 hover:-translate-y-1">
-          {/* IMAGE SECTION - Reduced height for compact carousel */}
-          <div className="relative h-48 overflow-hidden">
-            {/* Badge: Enhanced Glass Morphism */}
-            <div className="absolute top-3 left-3 z-10 flex gap-1.5 flex-wrap">
-              <span className="px-3 py-1 bg-white/95 backdrop-blur-lg rounded-full text-[9px] font-extrabold uppercase tracking-widest text-gray-900 shadow-lg border border-white/40">
-                {property.propertyType}
-              </span>
-              {property.isFeatured && (
-                <span className="px-3 py-1 bg-gradient-to-r from-[#F59E0B] to-[#D97706] backdrop-blur-lg rounded-full text-[9px] font-extrabold uppercase tracking-widest text-white shadow-lg border border-white/30">
-                  Featured
-                </span>
-              )}
-            </div>
+      <Link
+        href={`/property/${property.id}`}
+        className="block h-full draggable-prevent-click"
+      >
+        {/* IMAGE FRAME */}
+        <div className="relative w-full aspect-[3/4] overflow-hidden bg-gray-100 mb-6 cursor-none group-hover:cursor-pointer">
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-700 z-10" />
+          <img
+            src={property.imageUrl}
+            alt={property.title}
+            className="w-full h-full object-cover transform transition-transform duration-[1.5s] ease-out group-hover:scale-105 will-change-transform pointer-events-none" // pointer-events-none ensures image doesn't block drag
+          />
 
-            {/* Like Button - Enhanced */}
-            <button
-              onClick={(e) => e.preventDefault()}
-              className="absolute top-3 right-3 z-10 w-8 h-8 flex items-center justify-center bg-white/95 backdrop-blur-lg rounded-full text-gray-400 hover:text-red-500 hover:scale-110 transition-all duration-300 shadow-lg border border-white/40"
-            >
-              <Heart className="w-3.5 h-3.5" />
-            </button>
-
-            <img
-              src={property.imageUrl}
-              alt={property.title}
-              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
-            />
-
-            {/* Enhanced Gradient Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-50 group-hover:opacity-30 transition-opacity duration-500" />
-          </div>
-
-          {/* CONTENT SECTION - Compact spacing */}
-          <div className="p-5 flex flex-col flex-grow relative">
-            {/* Title & Location */}
-            <div className="mb-3">
-              <div className="flex justify-between items-start gap-2 mb-1.5">
-                <h3 className="text-base font-serif font-semibold text-gray-900 line-clamp-2 leading-tight group-hover:text-[#F59E0B] transition-colors cursor-pointer">
-                  {property.title}
-                </h3>
-                <span className="text-[#F59E0B] opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 flex-shrink-0">
-                  <ArrowUpRight className="w-4 h-4" />
-                </span>
-              </div>
-
-              <div className="flex items-center text-gray-500 text-[10px] font-semibold uppercase tracking-wider mt-1.5">
-                <MapPin className="w-3 h-3 mr-1 text-[#F59E0B]" />
-                <span className="line-clamp-1">{property.location}</span>
-              </div>
-            </div>
-
-            {/* Divider */}
-            <div className="w-full h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent mb-3"></div>
-
-            {/* PROJECT DESCRIPTION - Compact */}
-            <div className="flex-grow">
-              <p className="text-xs text-gray-600 leading-relaxed line-clamp-2 mb-3">
-                {property.description}
-              </p>
-            </div>
-
-            {/* Learn More Link */}
-            <div className="mt-auto pt-2">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-[#F59E0B] hover:text-[#D97706] transition-colors flex items-center gap-1.5 group/btn">
-                <span>Learn More</span>
-                <ArrowUpRight className="w-3 h-3 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />
+          {/* Custom Cursor Replacement on Hover */}
+          <div className="absolute inset-0 z-20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
+            <div className="w-20 h-20 rounded-full border border-white/80 backdrop-blur-sm flex items-center justify-center bg-white/10">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-white">
+                View
               </span>
             </div>
           </div>
+        </div>
+
+        {/* METADATA */}
+        <div className="flex flex-col items-start pr-4 pointer-events-none">
+          {" "}
+          {/* content shouldn't interfere with drag */}
+          <div className="flex items-center gap-3 text-[11px] font-medium tracking-[0.15em] uppercase text-gray-400 mb-2">
+            <span>{property.location}</span>
+            <span className="w-3 h-[1px] bg-gray-300"></span>
+            <span>{property.propertyType}</span>
+          </div>
+          <h3 className="text-2xl md:text-3xl font-serif text-gray-900 leading-tight mb-3">
+            {property.title}
+          </h3>
+          <p className="text-sm text-gray-500 font-light leading-relaxed line-clamp-2 max-w-sm">
+            {property.description}
+          </p>
         </div>
       </Link>
     </motion.div>
   );
 };
 
-const FeaturedProperties: React.FC<FeaturedPropertiesProps> = ({
+// ------------------------------------------------------------------
+// SECTION: HORIZONTAL ARCHIVE (With Drag & Wheel Support)
+// ------------------------------------------------------------------
+const FeaturedProperties: React.FC<{ properties: Property[] }> = ({
   properties,
 }) => {
-  const scrollContainerRef = React.useRef<HTMLDivElement>(null);
-  const [canScrollLeft, setCanScrollLeft] = React.useState(false);
-  const [canScrollRight, setCanScrollRight] = React.useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [scrollProgress, setScrollProgress] = useState(0);
 
-  const checkScroll = () => {
+  // Drag State
+  const [isDown, setIsDown] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+
+  // Auto-scroll State
+  const [isHovered, setIsHovered] = useState(false);
+  const animationFrameRef = useRef<number | null>(null);
+  const scrollSpeedRef = useRef(0.5); // pixels per frame
+
+  // 1. AUTO-SCROLL EFFECT
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const autoScroll = () => {
+      if (!isHovered && !isDown) {
+        const { scrollLeft, scrollWidth, clientWidth } = container;
+
+        // Check if we've reached the end
+        if (scrollLeft >= scrollWidth - clientWidth - 1) {
+          // Loop back to start smoothly
+          container.scrollLeft = 0;
+        } else {
+          // Continue scrolling
+          container.scrollLeft += scrollSpeedRef.current;
+        }
+      }
+
+      animationFrameRef.current = requestAnimationFrame(autoScroll);
+    };
+
+    animationFrameRef.current = requestAnimationFrame(autoScroll);
+
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, [isHovered, isDown]);
+
+  // 2. HANDLE MOUSE WHEEL (Vertical Scroll -> Horizontal Scroll)
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      // Only hijack scroll if we are not at the edges, or if it's a strong intentional scroll
+      // This logic prevents the user from getting "stuck" on the section
+      if (e.deltaY === 0) return;
+
+      // Scroll horizontal
+      container.scrollLeft += e.deltaY;
+
+      // Optional: Prevent default page scroll ONLY if we are actually scrolling horizontally
+      // e.preventDefault();
+    };
+
+    container.addEventListener("wheel", handleWheel, { passive: true }); // passive: true improves performance
+    return () => container.removeEventListener("wheel", handleWheel);
+  }, []);
+
+  // 3. HANDLE SCROLL PROGRESS BAR
+  const handleScroll = () => {
     if (scrollContainerRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } =
         scrollContainerRef.current;
-      setCanScrollLeft(scrollLeft > 0);
-      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
+      const totalScroll = scrollWidth - clientWidth;
+      const progress = (scrollLeft / totalScroll) * 100;
+      setScrollProgress(progress);
     }
   };
 
-  React.useEffect(() => {
-    checkScroll();
-    const container = scrollContainerRef.current;
-    if (container) {
-      container.addEventListener("scroll", checkScroll);
-      window.addEventListener("resize", checkScroll);
-      return () => {
-        container.removeEventListener("scroll", checkScroll);
-        window.removeEventListener("resize", checkScroll);
-      };
-    }
-  }, [properties]);
+  // 4. HANDLE DRAG INTERACTIONS
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!scrollContainerRef.current) return;
+    setIsDown(true);
+    setStartX(e.pageX - scrollContainerRef.current.offsetLeft);
+    setScrollLeft(scrollContainerRef.current.scrollLeft);
+  };
 
+  const handleMouseLeave = () => {
+    setIsDown(false);
+  };
+
+  const handleMouseUp = () => {
+    setIsDown(false);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDown || !scrollContainerRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - scrollContainerRef.current.offsetLeft;
+    const walk = (x - startX) * 2; // * 2 is the speed multiplier
+    scrollContainerRef.current.scrollLeft = scrollLeft - walk;
+  };
+
+  // Button Controls
   const scroll = (direction: "left" | "right") => {
     if (scrollContainerRef.current) {
-      const scrollAmount = scrollContainerRef.current.clientWidth * 0.8;
+      const scrollAmount = window.innerWidth < 768 ? 300 : 600;
       scrollContainerRef.current.scrollBy({
         left: direction === "left" ? -scrollAmount : scrollAmount,
         behavior: "smooth",
@@ -145,97 +189,95 @@ const FeaturedProperties: React.FC<FeaturedPropertiesProps> = ({
   if (!properties || properties.length === 0) return null;
 
   return (
-    // Background: Clean Light Gray
-    <section id="featured" className="py-24 bg-[#F9FAFB]">
-      <div className="container mx-auto px-6 max-w-7xl">
-        {/* SECTION HEADER: Clean & Editorial */}
-        <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="max-w-2xl"
-          >
-            <span className="text-[#F59E0B] font-bold tracking-widest uppercase text-xs mb-3 block">
-              Our Portfolio
-            </span>
-            <h2 className="text-4xl md:text-5xl font-serif text-gray-900 mb-4 leading-tight">
-              Ongoing Projects
+    <section className="py-32 bg-[#FDFDFD] overflow-hidden relative">
+      <div className="container mx-auto px-6 max-w-[1600px]">
+        {/* HEADER */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 border-b border-gray-200 pb-6">
+          <div className="max-w-2xl">
+            <div className="flex items-center gap-2 mb-4">
+              <Minus className="w-8 h-px text-gray-400" />
+              <span className="text-[11px] font-bold tracking-[0.25em] uppercase text-gray-400">
+                Selected Works
+              </span>
+            </div>
+            <h2 className="text-5xl md:text-6xl font-serif text-gray-900 leading-[1.1]">
+              Curated Spaces
             </h2>
-            <p className="text-lg text-gray-500 font-light leading-relaxed max-w-lg">
-              Discover our current developments and transformations, showcasing
-              excellence in design and execution.
-            </p>
-          </motion.div>
+          </div>
 
-          <Link href="/projects">
-            <motion.button
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              className="hidden md:flex items-center gap-3 px-8 py-3 bg-white border border-gray-200 text-gray-900 hover:border-gray-900 transition-all text-xs font-bold uppercase tracking-widest shadow-sm hover:shadow-md"
-            >
-              View All <ArrowUpRight className="w-4 h-4" />
-            </motion.button>
-          </Link>
-        </div>
-
-        {/* HORIZONTAL SCROLLING CAROUSEL */}
-        <div className="relative">
-          {/* Left Gradient Overlay */}
-          {canScrollLeft && (
-            <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-[#F9FAFB] to-transparent z-10 pointer-events-none" />
-          )}
-
-          {/* Right Gradient Overlay */}
-          {canScrollRight && (
-            <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-[#F9FAFB] to-transparent z-10 pointer-events-none" />
-          )}
-
-          {/* Left Scroll Button */}
-          {canScrollLeft && (
+          {/* Navigation Arrows */}
+          <div className="hidden md:flex gap-4 items-center">
             <button
               onClick={() => scroll("left")}
-              className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 flex items-center justify-center bg-white rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-110 border border-gray-200"
+              className="w-12 h-12 rounded-full border border-gray-200 flex items-center justify-center hover:bg-black hover:border-black hover:text-white transition-all duration-300 active:scale-95"
             >
-              <ArrowUpRight className="w-5 h-5 rotate-180 text-gray-900" />
+              <ArrowRight className="w-4 h-4 rotate-180" />
             </button>
-          )}
-
-          {/* Right Scroll Button */}
-          {canScrollRight && (
             <button
               onClick={() => scroll("right")}
-              className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 flex items-center justify-center bg-white rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-110 border border-gray-200"
+              className="w-12 h-12 rounded-full border border-gray-200 flex items-center justify-center hover:bg-black hover:border-black hover:text-white transition-all duration-300 active:scale-95"
             >
-              <ArrowUpRight className="w-5 h-5 text-gray-900" />
+              <ArrowRight className="w-4 h-4" />
             </button>
-          )}
+          </div>
+        </div>
 
-          {/* Scrollable Container */}
+        {/* CAROUSEL CONTAINER */}
+        <div className="relative -mr-6 md:-mr-[calc((100vw-100%)/2)]">
           <div
             ref={scrollContainerRef}
-            className="flex gap-6 overflow-x-auto overflow-y-hidden scrollbar-hide h-[480px] scroll-smooth"
-            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+            onScroll={handleScroll}
+            onMouseDown={handleMouseDown}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => {
+              setIsHovered(false);
+              setIsDown(false);
+            }}
+            onMouseUp={handleMouseUp}
+            onMouseMove={handleMouseMove}
+            className={`
+              flex gap-8 md:gap-12 overflow-x-auto overflow-y-hidden pb-12 pr-12
+              cursor-grab active:cursor-grabbing
+              scrollbar-hide
+            `}
+            style={{
+              scrollbarWidth: "none",
+              msOverflowStyle: "none",
+            }}
           >
             {properties.map((property, index) => (
               <div
                 key={property.id}
-                className="flex-shrink-0 w-full sm:w-[calc(50%-12px)] lg:w-[calc(25%-18px)]"
+                className="flex-shrink-0 w-[85vw] sm:w-[45vw] lg:w-[28vw] xl:w-[22vw]"
               >
                 <ProjectCard property={property} index={index} />
               </div>
             ))}
+
+            {/* "View All" Card */}
+            <div className="flex-shrink-0 w-[20vw] flex items-center justify-center h-auto aspect-[3/4]">
+              <Link
+                href="/projects"
+                className="group flex flex-col items-center gap-4"
+              >
+                <div className="w-20 h-20 rounded-full border border-gray-300 flex items-center justify-center group-hover:bg-black group-hover:border-black transition-all duration-500">
+                  <ArrowRight className="w-6 h-6 text-gray-900 group-hover:text-white" />
+                </div>
+                <span className="text-xs font-bold uppercase tracking-widest text-gray-900 border-b border-transparent group-hover:border-gray-900 transition-colors">
+                  View Archive
+                </span>
+              </Link>
+            </div>
           </div>
         </div>
 
-        {/* Mobile View All Button */}
-        <div className="mt-12 flex justify-center md:hidden">
-          <Link href="/projects" className="w-full">
-            <button className="flex items-center gap-2 px-8 py-4 bg-gray-900 text-white font-bold uppercase tracking-wider text-xs shadow-lg w-full justify-center">
-              View All Projects
-            </button>
-          </Link>
+        {/* CUSTOM PROGRESS BAR */}
+        <div className="w-full h-[1px] bg-gray-200 mt-4 relative max-w-4xl">
+          <motion.div
+            className="absolute top-0 left-0 h-[2px] bg-black"
+            style={{ width: `${Math.min(Math.max(scrollProgress, 0), 100)}%` }}
+            layoutId="scrollbar"
+          />
         </div>
       </div>
 
