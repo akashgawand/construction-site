@@ -19,7 +19,7 @@ interface CaseStudy {
 // Custom easing for that "luxury" slow-settle feel
 const transitionSettings = {
   duration: 0.8,
-  ease: [0.32, 0.72, 0, 1],
+  ease: [0.32, 0.72, 0, 1] as const,
 };
 
 export default function PreviousWork() {

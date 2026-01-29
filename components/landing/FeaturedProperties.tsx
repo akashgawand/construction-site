@@ -4,25 +4,16 @@ import React from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { MapPin, ArrowUpRight, Heart } from "lucide-react";
+import { type Property } from "@/lib/data";
 
 // Accent color for consistent branding (Amber/Gold)
 const ACCENT_COLOR = "#F59E0B";
 
-interface Project {
-  id: number;
-  title: string;
-  description: string;
-  location: string;
-  imageUrl: string;
-  projectType: string;
-  status?: string;
-}
-
 interface FeaturedPropertiesProps {
-  properties: Project[];
+  properties: Property[];
 }
 
-const ProjectCard: React.FC<{ property: Project; index: number }> = ({
+const ProjectCard: React.FC<{ property: Property; index: number }> = ({
   property,
   index,
 }) => {
@@ -42,11 +33,11 @@ const ProjectCard: React.FC<{ property: Project; index: number }> = ({
             {/* Badge: Enhanced Glass Morphism */}
             <div className="absolute top-3 left-3 z-10 flex gap-1.5 flex-wrap">
               <span className="px-3 py-1 bg-white/95 backdrop-blur-lg rounded-full text-[9px] font-extrabold uppercase tracking-widest text-gray-900 shadow-lg border border-white/40">
-                {property.projectType}
+                {property.propertyType}
               </span>
-              {property.status && (
+              {property.isFeatured && (
                 <span className="px-3 py-1 bg-gradient-to-r from-[#F59E0B] to-[#D97706] backdrop-blur-lg rounded-full text-[9px] font-extrabold uppercase tracking-widest text-white shadow-lg border border-white/30">
-                  {property.status}
+                  Featured
                 </span>
               )}
             </div>
