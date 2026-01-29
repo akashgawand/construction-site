@@ -22,7 +22,7 @@ import {
   Dumbbell,
   UtensilsCrossed,
 } from "lucide-react";
-import api from "@/lib/api";
+import { getCaseStudies } from "@/lib/data";
 import ROIEstimator from "@/components/landing/ROIEstimator";
 
 interface CaseStudy {
@@ -47,8 +47,11 @@ export default function PropertyDetailPage() {
     const fetchProperty = async () => {
       try {
         setIsLoading(true);
-        const response = await api.get(`/case-studies/${params.id}`);
-        setProperty(response.data);
+        const allCaseStudies = getCaseStudies();
+        const foundProperty = allCaseStudies.find(
+          (study) => study.id === Number(params.id),
+        );
+        setProperty(foundProperty || null);
       } catch (error) {
         console.error("Failed to fetch property:", error);
       } finally {
