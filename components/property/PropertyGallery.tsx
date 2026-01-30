@@ -1,11 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, X, Maximize2, Play } from "lucide-react";
 import { type PropertyMedia } from "@/lib/data";
-import ReactPlayer from "react-player";
-import { Pannellum } from "pannellum-react";
 
 interface PropertyGalleryProps {
   media: PropertyMedia[];
@@ -18,6 +16,14 @@ const PropertyGallery: React.FC<PropertyGalleryProps> = ({
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [Pannellum, setPannellum] = useState<any>(null);
+
+  useEffect(() => {
+    // Dynamically import pannellum-react only on client side
+    import("pannellum-react").then((module) => {
+      setPannellum(() => module.Pannellum);
+    });
+  }, []);
 
   const currentMedia = media[currentIndex];
 
@@ -41,17 +47,21 @@ const PropertyGallery: React.FC<PropertyGalleryProps> = ({
         );
       case "video":
         return (
-          <div className="relative w-full h-full bg-black">
-            <ReactPlayer
-              url={mediaItem.url}
-              width="100%"
-              height="100%"
-              controls
-              playing={isMain && !isFullscreen}
-            />
+          <div className="relative w-full h-full bg-black flex items-center justify-center text-white">
+            <div className="text-center">
+              <Play className="w-16 h-16 mx-auto mb-4" />
+              <p>Video Player</p>
+            </div>
           </div>
         );
       case "360":
+        if (!Pannellum) {
+          return (
+            <div className="w-full h-full bg-stone-900 flex items-center justify-center text-white text-sm">
+              Loading 360° Viewer...
+            </div>
+          );
+        }
         return (
           <div className="w-full h-full">
             <Pannellum
