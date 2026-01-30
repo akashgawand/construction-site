@@ -9,16 +9,20 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@react-google-maps/api": "^2.20.8",
     "axios": "^1.7.9",
     "clsx": "^2.1.1",
     "framer-motion": "^12.0.6",
     "js-cookie": "^3.0.5",
     "lucide-react": "^0.469.0",
     "next": "16.1.5",
+    "pannellum-react": "^1.2.4",
     "react": "19.2.3",
     "react-compare-image": "^3.4.0",
     "react-dom": "19.2.3",
+    "react-player": "^3.4.0",
     "react-simple-maps": "^3.0.0",
+    "swiper": "^12.1.0",
     "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {

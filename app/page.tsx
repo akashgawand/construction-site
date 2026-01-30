@@ -1,10 +1,11 @@
 import HeroSection from "@/components/landing/HeroSection";
 import FeaturedProperties from "@/components/landing/FeaturedProperties";
+import PopularCities from "@/components/landing/PopularCities";
 import BeforeAfterSection from "@/components/landing/BeforeAfterSection";
 import ROIEstimator from "@/components/landing/ROIEstimator";
 import TrustMarquee from "@/components/landing/TrustMarquee";
 import CTASection from "@/components/landing/CTASection";
-import PreviousWork from "@/components/landing/PreviousWork";
+// import PreviousWork from "@/components/landing/PreviousWork";
 import AboutSection from "@/components/landing/AboutSection";
 import { getLandingData } from "@/lib/landing-data";
 
@@ -20,16 +21,19 @@ export default async function HomePage() {
               <HeroSection key={section.id} content={hero} />
             ) : null;
 
-          case "about":
-            return <AboutSection key={section.id} />;
-
-          case "previousWork":
-            return <PreviousWork key={section.id} />;
-
           case "featured":
             return properties.length > 0 ? (
               <FeaturedProperties key={section.id} properties={properties} />
             ) : null;
+
+          case "popularCities":
+            return <PopularCities key={section.id} />;
+
+          case "about":
+            return <AboutSection key={section.id} />;
+
+          // case "previousWork":
+          //   return <PreviousWork key={section.id} />;
 
           case "beforeAfter":
             return beforeAfter.length > 0 ? (

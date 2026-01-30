@@ -1,19 +1,15 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
-  ArrowLeft,
-  ArrowRight,
   MapPin,
-  Phone,
-  Download,
-  Shield,
-  Car,
-  Trees,
   ChevronDown,
-  Map as MapIcon,
-  List,
+  Heart,
+  Building2,
+  Calendar,
+  Users,
+  Phone,
 } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
@@ -41,11 +37,18 @@ interface Pagination {
 
 const PROPERTY_TYPES = ["Residential", "Commercial", "Plot", "Villa"];
 
-const AMENITIES = [
-  { icon: Shield, label: "24/7 Security" },
-  { icon: Car, label: "Valet Parking" },
-  { icon: Trees, label: "Private Gardens" },
-];
+// State abbreviation to full name mapping
+const STATE_NAMES: Record<string, string> = {
+  NY: "New York",
+  CA: "California",
+  FL: "Florida",
+  TX: "Texas",
+  CO: "Colorado",
+  IL: "Illinois",
+  WA: "Washington",
+  MA: "Massachusetts",
+  AZ: "Arizona",
+};
 
 function ProjectsContent() {
   const router = useRouter();
@@ -57,10 +60,10 @@ function ProjectsContent() {
   const [selectedPropertyType, setSelectedPropertyType] =
     useState<string>("All");
   const [selectedState, setSelectedState] = useState<string>("All");
-  const [showMap, setShowMap] = useState(true);
+  const [imageIndices, setImageIndices] = useState<Record<number, number>>({});
 
   const currentPage = Number(searchParams.get("page")) || 1;
-  const LIMIT = 5;
+  const LIMIT = 10;
 
   useEffect(() => {
     fetchProjects(currentPage);
@@ -71,22 +74,18 @@ function ProjectsContent() {
     try {
       setIsLoading(true);
 
-      // Get all case studies from static data
       let allStudies = getCaseStudies();
 
-      // Filter by property type
       if (selectedPropertyType && selectedPropertyType !== "All") {
         allStudies = allStudies.filter(
           (s) => s.category === selectedPropertyType,
         );
       }
 
-      // Filter by state
       if (selectedState && selectedState !== "All") {
         allStudies = allStudies.filter((s) => s.state === selectedState);
       }
 
-      // Calculate pagination
       const total = allStudies.length;
       const totalPages = Math.ceil(total / LIMIT);
       const startIndex = (page - 1) * LIMIT;
@@ -109,17 +108,14 @@ function ProjectsContent() {
 
   const fetchStateCounts = async () => {
     try {
-      // Get all case studies from static data
       let allStudies = getCaseStudies();
 
-      // Filter by property type if selected
       if (selectedPropertyType && selectedPropertyType !== "All") {
         allStudies = allStudies.filter(
           (s) => s.category === selectedPropertyType,
         );
       }
 
-      // Count by state
       const counts: Record<string, number> = {};
       allStudies.forEach((study) => {
         if (study.state) {
@@ -138,328 +134,315 @@ function ProjectsContent() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  return (
-    <main className="min-h-screen bg-[#FDFBF9] pb-32 font-sans text-stone-900 selection:bg-stone-200">
-      <div className="container mx-auto px-6 md:px-12 max-w-7xl pt-20">
-        {/* --- EDITORIAL INTRO SECTION --- */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-12 mb-24 border-b border-stone-300 pb-12">
-          <div className="md:col-span-7">
-            <h1 className="text-4xl md:text-6xl font-serif text-stone-900 leading-tight">
-              Curated <span className="italic text-stone-600">Living</span>{" "}
-              <br />
-              Spaces & Estates
-            </h1>
-          </div>
-          <div className="md:col-span-5 flex flex-col justify-end">
-            <p className="text-stone-700 text-base md:text-lg leading-relaxed max-w-md">
-              Discover a portfolio of architecturally significant properties.
-              Each development is selected for its uncompromising standards of
-              design, craftsmanship, and location.
-            </p>
-            <div className="flex items-center gap-4 mt-6">
-              <span className="text-xs font-bold uppercase tracking-widest text-stone-900">
-                {caseStudies.length} Residences Available
-              </span>
-              <div className="h-px w-12 bg-stone-900"></div>
-            </div>
-          </div>
-        </div>
+  // Image slider handlers
+  const handlePrevImage = (e: React.MouseEvent, propertyId: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setImageIndices((prev) => ({
+      ...prev,
+      [propertyId]: Math.max((prev[propertyId] || 0) - 1, 0),
+    }));
+  };
 
-        {/* --- FILTERS AND LAYOUT CONTROLS --- */}
-        <div className="mb-8">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
-            {/* Dropdown Filters */}
-            <div className="flex flex-wrap items-center gap-4">
-              {/* Property Type Dropdown */}
-              <div className="relative">
-                <select
-                  value={selectedPropertyType}
-                  onChange={(e) => setSelectedPropertyType(e.target.value)}
-                  className="appearance-none bg-white border border-stone-300 text-stone-900 text-sm px-4 py-2.5 pr-10 focus:outline-none focus:border-stone-900 transition-colors cursor-pointer"
-                >
-                  <option value="All">All Property Types</option>
-                  {PROPERTY_TYPES.map((type) => (
-                    <option key={type} value={type}>
-                      {type}
+  const handleNextImage = (e: React.MouseEvent, propertyId: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const maxIndex = 4; // Assuming 5 images per property
+    setImageIndices((prev) => ({
+      ...prev,
+      [propertyId]: Math.min((prev[propertyId] || 0) + 1, maxIndex),
+    }));
+  };
+
+  // Helper to format price
+  const formatPrice = (id: number) => {
+    const basePrice = 500000 + id * 150000;
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      maximumFractionDigits: 0,
+    }).format(basePrice);
+  };
+
+  // Helper to format area
+  const formatArea = (id: number) => {
+    const baseArea = 2500 + id * 1000;
+    return new Intl.NumberFormat("en-US").format(baseArea);
+  };
+
+  return (
+    <main className="h-screen flex flex-col bg-white overflow-hidden">
+      {/* TOP BAR */}
+      <div className="flex-shrink-0 bg-white border-b border-gray-200 px-6 py-4">
+        <div className="flex items-center justify-between">
+          {/* Left: Filters */}
+          <div className="flex items-center gap-3">
+            {/* For Lease Dropdown */}
+            <div className="relative">
+              <select className="appearance-none bg-white border border-gray-300 text-gray-900 text-sm px-4 py-2 pr-8 rounded focus:outline-none focus:border-gray-900 cursor-pointer">
+                <option>For Lease</option>
+                <option>For Sale</option>
+              </select>
+              <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600 pointer-events-none" />
+            </div>
+
+            {/* Property Type */}
+            <div className="relative">
+              <select
+                value={selectedPropertyType}
+                onChange={(e) => setSelectedPropertyType(e.target.value)}
+                className="appearance-none bg-white border border-gray-300 text-gray-900 text-sm px-4 py-2 pr-8 rounded focus:outline-none focus:border-gray-900 cursor-pointer"
+              >
+                <option value="All">Space Uses</option>
+                {PROPERTY_TYPES.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600 pointer-events-none" />
+            </div>
+
+            {/* State Dropdown */}
+            <div className="relative">
+              <select
+                value={selectedState}
+                onChange={(e) => setSelectedState(e.target.value)}
+                className="appearance-none bg-white border border-gray-300 text-gray-900 text-sm px-4 py-2 pr-8 rounded focus:outline-none focus:border-gray-900 cursor-pointer"
+              >
+                <option value="All">All States</option>
+                {Object.keys(stateCounts)
+                  .sort((a, b) =>
+                    (STATE_NAMES[a] || a).localeCompare(STATE_NAMES[b] || b),
+                  )
+                  .map((state) => (
+                    <option key={state} value={state}>
+                      {STATE_NAMES[state] || state}
                     </option>
                   ))}
-                </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-600 pointer-events-none" />
-              </div>
-
-              {/* State Dropdown */}
-              <div className="relative">
-                <select
-                  value={selectedState}
-                  onChange={(e) => setSelectedState(e.target.value)}
-                  className="appearance-none bg-white border border-stone-300 text-stone-900 text-sm px-4 py-2.5 pr-10 focus:outline-none focus:border-stone-900 transition-colors cursor-pointer"
-                >
-                  <option value="All">All States</option>
-                  {Object.keys(stateCounts)
-                    .sort()
-                    .map((state) => (
-                      <option key={state} value={state}>
-                        {state} ({stateCounts[state]})
-                      </option>
-                    ))}
-                </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-600 pointer-events-none" />
-              </div>
-
-              {/* Clear Filters */}
-              {(selectedPropertyType !== "All" || selectedState !== "All") && (
-                <button
-                  onClick={() => {
-                    setSelectedPropertyType("All");
-                    setSelectedState("All");
-                  }}
-                  className="text-sm text-stone-600 hover:text-stone-900 underline transition-colors"
-                >
-                  Clear Filters
-                </button>
-              )}
+              </select>
+              <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600 pointer-events-none" />
             </div>
 
-            {/* Map Toggle */}
-            <button
-              onClick={() => setShowMap(!showMap)}
-              className="flex items-center gap-2 px-4 py-2.5 border border-stone-300 text-stone-900 text-sm font-medium hover:border-stone-900 transition-colors"
-            >
-              {showMap ? (
-                <>
-                  <List className="w-4 h-4" />
-                  Hide Map
-                </>
-              ) : (
-                <>
-                  <MapIcon className="w-4 h-4" />
-                  Show Map
-                </>
-              )}
+            {/* All Filters Button */}
+            <button className="px-4 py-2 border border-gray-300 rounded text-sm text-gray-900 hover:border-gray-900 transition-colors">
+              All Filters
             </button>
+
+            {/* Clear Filters Button */}
+            {(selectedPropertyType !== "All" || selectedState !== "All") && (
+              <button
+                onClick={() => {
+                  setSelectedPropertyType("All");
+                  setSelectedState("All");
+                }}
+                className="px-4 py-2 text-sm text-red-600 hover:text-red-700 font-medium transition-colors"
+              >
+                Clear Filters
+              </button>
+            )}
+          </div>
+
+          {/* Right: Actions */}
+          <div className="flex items-center gap-3">
+            <button className="px-4 py-2 text-sm text-gray-700 hover:text-gray-900">
+              Save Search
+            </button>
+            <div className="relative">
+              <select className="appearance-none bg-white border border-gray-300 text-gray-900 text-sm px-4 py-2 pr-8 rounded focus:outline-none cursor-pointer">
+                <option>Sort</option>
+                <option>Price: Low to High</option>
+                <option>Price: High to Low</option>
+                <option>Newest</option>
+              </select>
+              <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600 pointer-events-none" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* MAIN CONTENT: MAP + LISTINGS */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* LEFT: MAP */}
+        <div className="w-1/2 relative bg-gray-100">
+          <div className="absolute inset-0">
+            <USMap
+              stateCounts={stateCounts}
+              selectedState={selectedState !== "All" ? selectedState : null}
+              onStateClick={(state) => setSelectedState(state)}
+            />
+          </div>
+
+          {/* Map Controls */}
+          <div className="absolute top-4 left-4 bg-white rounded shadow-lg p-2 flex items-center gap-2 text-sm">
+            <MapPin className="w-4 h-4 text-gray-600" />
+            <span className="text-gray-900 font-medium">Current Map Area</span>
+          </div>
+
+          {/* Results Count */}
+          <div className="absolute top-4 right-4 bg-white rounded shadow-lg px-3 py-2 text-sm text-gray-900">
+            {pagination?.total || 0}+ Results
           </div>
         </div>
 
-        {/* --- MAIN CONTENT GRID: MAP + LISTINGS --- */}
-        <div
-          className={`grid gap-8 mb-16 ${showMap ? "md:grid-cols-[400px_1fr]" : "grid-cols-1"}`}
-        >
-          {/* MAP SECTION (LEFT COLUMN) */}
-          {showMap && (
-            <div className="sticky top-24 h-fit">
-              <div className="bg-white p-4 border border-stone-200">
-                <USMap
-                  stateCounts={stateCounts}
-                  selectedState={selectedState !== "All" ? selectedState : null}
-                  onStateClick={(state) => setSelectedState(state)}
-                />
-                <div className="mt-4 flex items-center justify-center gap-6 text-xs">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-stone-500"></div>
-                    <span className="text-stone-600">Has Properties</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-stone-300"></div>
-                    <span className="text-stone-600">No Properties</span>
-                  </div>
-                </div>
-              </div>
+        {/* RIGHT: PROPERTY LISTINGS */}
+        <div className="w-1/2 overflow-y-auto bg-white">
+          {isLoading ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="w-12 h-12 border-4 border-gray-200 border-t-gray-900 rounded-full animate-spin"></div>
+            </div>
+          ) : (
+            <div className="divide-y divide-gray-200">
+              {caseStudies.map((study, index) => (
+                <Link
+                  key={study.id}
+                  href={`/property/${study.id}`}
+                  className="block"
+                >
+                  <motion.article
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: index * 0.05 }}
+                    className="group hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="p-8">
+                      {/* Header */}
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Building2 className="w-4 h-4 text-gray-400" />
+                            <span className="text-xs text-gray-500 uppercase tracking-wide">
+                              {study.category} Properties for Lease
+                            </span>
+                          </div>
+                          <h3 className="text-2xl font-semibold text-gray-900 mb-2">
+                            {formatArea(study.id)} SF Office Available
+                          </h3>
+                          <div className="flex items-center text-gray-900">
+                            <span className="font-medium text-lg">
+                              {study.title}
+                            </span>
+                          </div>
+                        </div>
+                        <button className="p-2 hover:bg-white rounded-full transition-colors">
+                          <Heart className="w-6 h-6 text-gray-400 hover:text-red-500" />
+                        </button>
+                      </div>
+
+                      {/* Image and Details Grid */}
+                      <div className="flex gap-6">
+                        {/* Image with Slider */}
+                        <div className="relative w-80 h-64 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 group/image">
+                          <img
+                            src={study.imageUrl}
+                            alt={study.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+
+                         
+
+                          {/* Image Counter */}
+                          <div className="absolute top-3 right-3 bg-black/60 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">
+                            {(imageIndices[study.id] || 0) + 1} / 5
+                          </div>
+
+                          {/* Previous Button */}
+                          <button
+                            onClick={(e) => handlePrevImage(e, study.id)}
+                            className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/90 hover:bg-white rounded-full flex items-center justify-center opacity-0 group-hover/image:opacity-100 transition-opacity shadow-lg"
+                            disabled={(imageIndices[study.id] || 0) === 0}
+                          >
+                            <ChevronDown className="w-5 h-5 text-gray-900 rotate-90" />
+                          </button>
+
+                          {/* Next Button */}
+                          <button
+                            onClick={(e) => handleNextImage(e, study.id)}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/90 hover:bg-white rounded-full flex items-center justify-center opacity-0 group-hover/image:opacity-100 transition-opacity shadow-lg"
+                            disabled={(imageIndices[study.id] || 0) === 4}
+                          >
+                            <ChevronDown className="w-5 h-5 text-gray-900 -rotate-90" />
+                          </button>
+                        </div>
+
+                        {/* Details */}
+                        <div className="flex-1 flex flex-col justify-between">
+                          {/* Property Info */}
+                          <div>
+                            <div className="flex items-center gap-6 text-sm text-gray-600 mb-3">
+                              <div className="flex items-center gap-1.5">
+                                <Building2 className="w-4 h-4" />
+                                <span>
+                                  {study.status === "Completed"
+                                    ? "Built"
+                                    : "Under Construction"}{" "}
+                                  in {study.year}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-1.5">
+                                <Calendar className="w-4 h-4" />
+                                <span>{formatArea(study.id)} SF Total</span>
+                              </div>
+                            </div>
+
+                            <p className="text-base text-gray-700 line-clamp-3 mb-4 leading-relaxed">
+                              {study.description}
+                            </p>
+
+                            {/* Location */}
+                            <div className="flex items-center gap-1.5 text-base text-gray-600 mb-4">
+                              <MapPin className="w-5 h-5" />
+                              <span>{study.location}</span>
+                            </div>
+
+                            {/* Additional Info */}
+                            <div className="flex items-center gap-4 text-sm text-gray-600">
+                              <span>6 Spaces Available Now</span>
+                              <span>•</span>
+                              <span>Art-filled office tower</span>
+                            </div>
+                          </div>
+
+                          {/* Agent Info */}
+                          <div className="flex items-center gap-4 pt-4 border-t border-gray-200 mt-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                                <Users className="w-5 h-5 text-gray-600" />
+                              </div>
+                              <div className="text-sm">
+                                <div className="font-semibold text-gray-900">
+                                  Agent Name
+                                </div>
+                                <div className="text-gray-500">
+                                  Licensed Broker
+                                </div>
+                              </div>
+                            </div>
+                            <button className="ml-auto flex items-center gap-2 px-5 py-2.5 bg-gray-900 text-white text-sm font-medium rounded hover:bg-gray-700 transition-colors">
+                              <Phone className="w-4 h-4" />
+                              Contact Agent
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.article>
+                </Link>
+              ))}
             </div>
           )}
 
-          {/* LISTINGS SECTION (RIGHT COLUMN) */}
-          <div>
-            {/* --- LOADING STATE --- */}
-            {isLoading ? (
-              <div className="flex flex-col items-center justify-center py-32">
-                <div className="w-px h-16 bg-stone-200 overflow-hidden relative">
-                  <div className="absolute inset-0 bg-stone-900 animate-[pulse_1.5s_ease-in-out_infinite]"></div>
-                </div>
-                <span className="mt-6 text-xs font-bold uppercase tracking-widest text-stone-500">
-                  Retrieving Portfolio...
-                </span>
-              </div>
-            ) : (
-              <div className="space-y-20">
-                {caseStudies.map((study, index) => (
-                  <Link
-                    key={study.id}
-                    href={`/property/${study.id}`}
-                    className="block"
-                  >
-                    <motion.article
-                      initial={{ opacity: 0, y: 30 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true, margin: "-100px" }}
-                      transition={{
-                        duration: 0.8,
-                        ease: "easeOut",
-                        delay: index * 0.1,
-                      }}
-                      // Added 'items-stretch' to ensure both columns are equal height
-                      className="group relative flex flex-col md:flex-row bg-white hover:shadow-xl hover:shadow-stone-200/50 transition-all duration-500 border border-transparent hover:border-stone-100 items-stretch cursor-pointer"
-                    >
-                      {/* --- IMAGE SECTION --- */}
-                      {/* UPDATED SIZING LOGIC:
-                    - Mobile: h-80 (Fixed height for carousel-like feel)
-                    - Desktop: h-auto (Matches the text column height exactly) + min-h (prevents it looking small)
-                    - Image: absolute inset-0 (Fills the wrapper perfectly)
-                */}
-                      <div className="w-full md:w-[55%] relative overflow-hidden h-80 md:h-auto md:min-h-[500px]">
-                        <div className="absolute inset-0 z-10 bg-black/5 group-hover:bg-transparent transition-colors duration-700" />
-
-                        <img
-                          src={study.imageUrl}
-                          alt={study.title}
-                          // 'absolute inset-0' ensures the image strictly follows the parent div size
-                          className="absolute inset-0 w-full h-full object-cover transform scale-100 group-hover:scale-105 transition-transform duration-[1.5s] ease-[cubic-bezier(0.25,1,0.5,1)]"
-                        />
-
-                        {/* Status Badge */}
-                        <div className="absolute top-6 left-6 z-20">
-                          <span
-                            className={`inline-block px-4 py-2 text-xs font-bold uppercase tracking-wider shadow-sm ${study.status === "Completed" ? "bg-stone-900 text-white" : "bg-white text-stone-900"}`}
-                          >
-                            {study.status}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* --- CONTENT SECTION --- */}
-                      <div className="w-full md:w-[45%] p-8 md:p-12 flex flex-col justify-between border-b border-r border-stone-200 md:border-t-0 md:border-l-0 md:border-r-0 border-l border-stone-200 bg-white">
-                        <div>
-                          {/* Header */}
-                          <div className="mb-8">
-                            <div className="flex items-center gap-2 mb-3">
-                              <div className="h-px w-8 bg-stone-900"></div>
-                              <span className="text-xs font-bold uppercase tracking-widest text-stone-600">
-                                {study.category} • Ref {study.id}
-                              </span>
-                            </div>
-
-                            <h2 className="text-3xl md:text-4xl font-serif text-stone-900 mb-3 group-hover:text-stone-600 transition-colors">
-                              {study.title}
-                            </h2>
-
-                            <div className="flex items-center text-stone-600 text-base font-medium">
-                              <MapPin className="w-4 h-4 mr-2 text-stone-800" />
-                              {study.location}
-                            </div>
-                          </div>
-
-                          {/* Data Points */}
-                          <div className="grid grid-cols-2 gap-8 mb-8 border-t border-b border-stone-100 py-6">
-                            <div>
-                              <p className="text-xs text-stone-500 font-bold uppercase tracking-widest mb-1">
-                                Total Area
-                              </p>
-                              <p className="text-2xl font-serif text-stone-900">
-                                12,500{" "}
-                                <span className="text-sm font-sans text-stone-500">
-                                  Sq Ft
-                                </span>
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-xs text-stone-500 font-bold uppercase tracking-widest mb-1">
-                                Completion
-                              </p>
-                              <p className="text-2xl font-serif text-stone-900">
-                                {study.year}
-                              </p>
-                            </div>
-                          </div>
-
-                          <p className="text-stone-600 text-base leading-7 mb-8">
-                            {study.description}
-                          </p>
-
-                          {/* Amenities Strip */}
-                          <div className="flex gap-8 mb-8">
-                            {AMENITIES.map((item, i) => (
-                              <div
-                                key={i}
-                                className="flex items-center gap-2 text-stone-500 group/icon"
-                                title={item.label}
-                              >
-                                <item.icon className="w-5 h-5 stroke-[1.5] text-stone-800" />
-                                <span className="text-xs font-medium hidden lg:block">
-                                  {item.label}
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-
-                        {/* Actions */}
-                        <div className="grid grid-cols-2 gap-4 mt-auto">
-                          <button className="h-14 border border-stone-900 bg-stone-900 text-white text-xs font-bold uppercase tracking-widest hover:bg-stone-700 transition-all duration-300 flex items-center justify-center gap-3">
-                            <Phone className="w-4 h-4" />
-                            Inquire
-                          </button>
-                          <button className="h-14 border border-stone-300 text-stone-900 text-xs font-bold uppercase tracking-widest hover:border-stone-900 hover:bg-stone-50 transition-colors flex items-center justify-center gap-3">
-                            <Download className="w-4 h-4" />
-                            Brochure
-                          </button>
-                        </div>
-                      </div>
-                    </motion.article>
-                  </Link>
-                ))}
-              </div>
-            )}
-
-            {/* --- CONFIDENCE / BRAND STATEMENT --- */}
-            <div className="py-24 text-center max-w-3xl mx-auto">
-              <div className="w-px h-16 bg-stone-900 mx-auto mb-8"></div>
-              <h3 className="text-3xl md:text-4xl font-serif text-stone-900 italic mb-4">
-                "Building legacies, not just structures."
-              </h3>
-              <p className="text-sm text-stone-600 uppercase tracking-widest font-bold">
-                Trusted by over 500 premium investors
-              </p>
-            </div>
-
-            {/* --- PAGINATION --- */}
-            {pagination && pagination.totalPages > 1 && (
-              <div className="flex justify-center border-t border-stone-300 pt-12">
-                <div className="flex items-center gap-12">
-                  <button
-                    onClick={() => handlePageChange(pagination.page - 1)}
-                    disabled={pagination.page === 1}
-                    className="group flex items-center gap-3 text-sm font-bold uppercase tracking-widest text-stone-500 hover:text-stone-900 disabled:opacity-30 transition-colors"
-                  >
-                    <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-                    Previous
-                  </button>
-
-                  <div className="font-serif text-xl text-stone-900">
-                    <span className="text-stone-400 mr-2 italic">Page</span>
-                    {pagination.page}
-                  </div>
-
-                  <button
-                    onClick={() => handlePageChange(pagination.page + 1)}
-                    disabled={pagination.page === pagination.totalPages}
-                    className="group flex items-center gap-3 text-sm font-bold uppercase tracking-widest text-stone-500 hover:text-stone-900 disabled:opacity-30 transition-colors"
-                  >
-                    Next
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Back Link */}
-            <div className="mt-16 text-center">
-              <a
-                href="/"
-                className="text-xs text-stone-500 hover:text-stone-900 uppercase tracking-[0.2em] transition-colors border-b border-transparent hover:border-stone-900 pb-1"
+          {/* Load More */}
+          {pagination && pagination.page < pagination.totalPages && (
+            <div className="p-6 text-center border-t border-gray-200">
+              <button
+                onClick={() => handlePageChange(pagination.page + 1)}
+                className="px-6 py-3 bg-gray-900 text-white text-sm font-medium rounded hover:bg-gray-700 transition-colors"
               >
-                Return to Dashboard
-              </a>
+                Load More Properties
+              </button>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </main>
@@ -470,8 +453,8 @@ export default function ProjectsPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center text-xs font-bold uppercase tracking-widest text-stone-500">
-          Loading Property Data...
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="w-12 h-12 border-4 border-gray-200 border-t-gray-900 rounded-full animate-spin"></div>
         </div>
       }
     >

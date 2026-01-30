@@ -3,6 +3,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import Button from "../ui/Button";
+import PropertySearch from "../search/PropertySearch";
 
 // --- Icons ---
 const ArrowRightIcon = () => (
@@ -21,19 +22,6 @@ const ArrowRightIcon = () => (
     <path d="m12 5 7 7-7 7" />
   </svg>
 );
-const PlayIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="currentColor"
-    stroke="currentColor"
-    strokeWidth="0"
-  >
-    <polygon points="5 3 19 12 5 21 5 3" />
-  </svg>
-);
 
 interface HeroContent {
   headline: string;
@@ -49,13 +37,13 @@ interface HeroSectionProps {
 
 const HeroSection: React.FC<HeroSectionProps> = ({ content }) => {
   const defaultContent = {
-    headline: "Building the Future, One Project at a Time.",
+    headline: "Discover Your Next Investment Opportunity",
     subheadline:
-      "We specialize in turning your complex construction ideas into reality. Quality, integrity, and innovation in every square foot.",
-    ctaText: "Start Your Project",
-    ctaLink: "#contact",
+      "Explore premium properties with exceptional ROI potential. From luxury residences to commercial spaces, find the perfect investment to grow your portfolio.",
+    ctaText: "Explore Properties",
+    ctaLink: "#featured",
     bgImageUrl:
-      "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?q=80&w=2070&auto=format&fit=crop", // Industrial/Construction vibe
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=2070&auto=format&fit=crop",
     ...content,
   };
 
@@ -65,7 +53,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ content }) => {
   };
 
   return (
-    <section className="relative h-screen w-full overflow-hidden bg-gray-900 text-white">
+    <section className="relative min-h-screen w-full overflow-hidden bg-gray-900 text-white">
       {/* --- 1. Background Image with Zoom Effect --- */}
       <motion.div
         initial={{ scale: 1.1 }}
@@ -82,20 +70,19 @@ const HeroSection: React.FC<HeroSectionProps> = ({ content }) => {
           }}
         />
         {/* Dark Overlay for Text Readability (Gradient) */}
-        <div className="absolute inset-0 bg-gradient-to-r from-gray-950/90 via-gray-950/60 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-gray-950/90 via-gray-950/70 to-gray-950/50" />
         <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-transparent to-transparent opacity-80" />
       </motion.div>
 
       {/* --- 2. Main Content Layout --- */}
-      <div className="relative z-10 container mx-auto px-6 h-full flex flex-col justify-center">
-        <div className="max-w-4xl">
+      <div className="relative z-10 container mx-auto px-6 min-h-screen flex flex-col justify-center py-20">
+        <div className="max-w-5xl mx-auto w-full">
           {/* Animated Line */}
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: "100px" }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="h-1 bg-[var(--color-accent)] mb-8"
-            style={{ backgroundColor: "#F59E0B" }} // Hardcoded yellow/amber if variable fails
+            className="h-1 bg-[#F59E0B] mb-8 mx-auto md:mx-0"
           />
 
           {/* Headline */}
@@ -103,7 +90,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ content }) => {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3 }}
-            className="text-5xl md:text-7xl lg:text-8xl font-serif font-light leading-[1.1] mb-8 tracking-tight"
+            className="text-4xl md:text-6xl lg:text-7xl font-serif font-light leading-[1.1] mb-6 tracking-tight text-center md:text-left"
           >
             {defaultContent.headline}
           </motion.h1>
@@ -113,19 +100,23 @@ const HeroSection: React.FC<HeroSectionProps> = ({ content }) => {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
-            className="text-lg md:text-2xl text-gray-300 max-w-2xl mb-12 font-light leading-relaxed"
+            className="text-base md:text-xl text-gray-300 max-w-3xl mb-12 font-light leading-relaxed text-center md:text-left mx-auto md:mx-0"
           >
             {defaultContent.subheadline}
           </motion.p>
 
-          {/* Buttons Area */}
+          {/* Search Bar */}
+          <div className="mb-12">
+            <PropertySearch />
+          </div>
+
+          {/* CTA Button */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.5 }}
-            className="flex flex-col sm:flex-row items-start sm:items-center gap-6"
+            transition={{ duration: 0.8, delay: 0.6 }}
+            className="flex justify-center md:justify-start"
           >
-            {/* Primary CTA (High Contrast Yellow/Amber) */}
             <Button
               onClick={handleCTAClick}
               className="px-10 py-5 bg-[#F59E0B] hover:bg-[#D97706] text-black font-bold text-lg rounded-none transition-all flex items-center gap-3 shadow-[0_0_20px_rgba(245,158,11,0.3)] hover:shadow-[0_0_30px_rgba(245,158,11,0.5)]"
@@ -133,54 +124,45 @@ const HeroSection: React.FC<HeroSectionProps> = ({ content }) => {
               <span>{defaultContent.ctaText}</span>
               <ArrowRightIcon />
             </Button>
-
-            {/* Secondary CTA (Glass) */}
-            {/* <button className="group flex items-center gap-3 px-6 py-4 text-white hover:text-[#F59E0B] transition-colors">
-              <div className="w-12 h-12 rounded-full border border-white/30 flex items-center justify-center group-hover:border-[#F59E0B] group-hover:bg-[#F59E0B]/10 transition-all">
-                <PlayIcon />
-              </div>
-              <span className="font-semibold tracking-wide uppercase text-sm">
-                Watch Showreel
-              </span>
-            </button> */}
           </motion.div>
         </div>
       </div>
 
       {/* --- 3. Bottom Floating Cards (Glassmorphism) --- */}
       <motion.div
-        initial={{ opacity: 0, y: 50 }}
+        initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.8 }}
-        className="absolute bottom-0 right-0 w-full md:w-auto p-6 md:p-0"
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="absolute bottom-6 left-6 right-6 md:left-auto md:right-12"
       >
-        <div className="flex flex-col md:flex-row bg-gray-900 md:bg-transparent">
-          {/* Card 1 */}
-          <div className="backdrop-blur-md bg-white/10 border-t md:border-t-0 md:border-l border-white/10 p-8 w-full md:w-64">
-            <h3 className="text-[#F59E0B] text-4xl font-bold mb-2">25+</h3>
-            <p className="text-gray-300 text-sm uppercase tracking-wider font-semibold">
-              Years of Experience
-            </p>
+        <div className="flex flex-col md:flex-row gap-8 md:gap-12 items-start md:items-center">
+          {/* Stat 1 */}
+          <div>
+            <div className="text-[#F59E0B] text-3xl md:text-4xl font-medium tracking-tight">
+              $2.5B+
+            </div>
+            <div className="mt-1 text-xs uppercase tracking-widest text-gray-400">
+              Properties Listed
+            </div>
           </div>
 
-          {/* Card 2 */}
-          <div className="backdrop-blur-md bg-white/5 border-t md:border-t-0 md:border-l border-white/10 p-8 w-full md:w-64">
-            <h3 className="text-white text-4xl font-bold mb-2">850</h3>
-            <p className="text-gray-300 text-sm uppercase tracking-wider font-semibold">
-              Projects Completed
-            </p>
+          {/* Stat 2 */}
+          <div>
+            <div className="text-white text-3xl md:text-4xl font-medium tracking-tight">
+              12.5%
+            </div>
+            <div className="mt-1 text-xs uppercase tracking-widest text-gray-400">
+              Average ROI
+            </div>
           </div>
 
-          {/* Card 3 (Active State Visual) */}
-          <div className="bg-[#F59E0B] p-8 w-full md:w-64 flex flex-col justify-center">
-            <p className="text-black font-bold text-lg leading-tight mb-2">
-              "Quality construction solutions for modern living."
+          {/* Mission */}
+          <div className="max-w-xs md:max-w-sm">
+            <p className="text-white text-sm leading-relaxed">
+              Smart investments for long-term wealth creation.
             </p>
-            <div className="flex items-center gap-2 mt-2">
-              <div className="w-8 h-px bg-black/50"></div>
-              <span className="text-black/70 text-xs font-bold uppercase">
-                Our Mission
-              </span>
+            <div className="mt-3 text-[11px] uppercase tracking-widest text-[#F59E0B]">
+              Our Mission
             </div>
           </div>
         </div>

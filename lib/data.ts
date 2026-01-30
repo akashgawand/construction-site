@@ -9,18 +9,45 @@ export interface HeroContent {
   bgImageUrl: string;
 }
 
+export interface PropertyMedia {
+  type: 'image' | 'video' | '360';
+  url: string;
+  thumbnail?: string;
+  badge?: string; // Optional badge text like "Investment Video", "Drone Video"
+}
+
+export interface AvailableSpace {
+  id: number;
+  floor: string;
+  suite: string;
+  capacity: string; // e.g., "1 - 4"
+  size: number; // in square feet
+  rentalRate: number; // monthly rate
+  spaceUse: string; // e.g., "Office"
+}
+
 export interface Property {
   id: number;
   title: string;
   description: string;
   price: number;
   location: string;
-  imageUrl: string;
+  imageUrl: string; // Keep for backward compatibility
+  media?: PropertyMedia[]; // New: multiple media support (optional for now)
+  coordinates?: {
+    lat: number;
+    lng: number;
+  };
   isFeatured: boolean;
   propertyType: string;
   bedrooms: number;
   bathrooms: number;
   area: number;
+  expectedROI?: number; // Expected return on investment percentage
+  rentalYield?: number; // Annual rental yield percentage
+  appreciationRate?: number; // Historical appreciation rate percentage
+  textHighlights?: string[]; // New: text-based highlights for bullet-point list
+  availableSpaces?: AvailableSpace[]; // New: available spaces for commercial properties
 }
 
 export interface ROIConfig {
@@ -84,10 +111,22 @@ export interface CaseStudy {
   displayOrder: number;
 }
 
+export interface PopularCity {
+  id: number;
+  name: string;
+  state: string;
+  imageUrl: string;
+  propertyCount: number;
+  averagePrice: number;
+  description: string;
+  isVisible: boolean;
+  order: number;
+}
+
 // Hero Content
 export const heroContent: HeroContent = {
-  headline: 'Find Your Dream Property',
-  subheadline: 'Discover premium real estate opportunities with exceptional ROI potential',
+  headline: 'Discover Your Next Investment',
+  subheadline: 'Explore premium properties with exceptional ROI potential.',
   ctaText: 'Explore Properties',
   ctaLink: '#featured',
   bgImageUrl: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1920&q=80',
@@ -163,9 +202,10 @@ export const marqueeSettings: MarqueeSettings = {
 // Landing Sections
 export const landingSections: LandingSection[] = [
   { id: 1, sectionKey: 'hero', title: 'Hero Section', isVisible: true, order: 0 },
-  { id: 2, sectionKey: 'about', title: 'About Section', isVisible: true, order: 1 },
-  { id: 3, sectionKey: 'previousWork', title: 'Previous Work', isVisible: true, order: 2 },
-  { id: 4, sectionKey: 'featured', title: 'Featured Properties', isVisible: true, order: 3 },
+  { id: 4, sectionKey: 'featured', title: 'Featured Properties', isVisible: true, order: 1 },
+  { id: 9, sectionKey: 'popularCities', title: 'Popular Cities', isVisible: true, order: 2 },
+  { id: 2, sectionKey: 'about', title: 'About Section', isVisible: true, order: 3 },
+  // { id: 3, sectionKey: 'previousWork', title: 'Previous Work', isVisible: true, order: 2 },
   { id: 5, sectionKey: 'beforeAfter', title: 'Transformations', isVisible: true, order: 4 },
   { id: 6, sectionKey: 'roiEstimator', title: 'ROI Estimator', isVisible: true, order: 5 },
   { id: 7, sectionKey: 'trust', title: 'Trust Partners', isVisible: true, order: 6 },
@@ -176,16 +216,47 @@ export const landingSections: LandingSection[] = [
 export const properties: Property[] = [
   {
     id: 1,
-    title: "Skyline Towers",
+    title: "Skyline Tower",
     description: "A landmark 45-story mixed-use development featuring premium residences, Grade-A office spaces, and luxury retail. Setting new standards for urban living with world-class amenities and sustainable design.",
     price: 2500000,
     location: "New York City, NY",
     imageUrl: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&q=80",
+    media: [
+      { type: 'image', url: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1200&q=80' },
+      { type: 'video', url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', badge: 'Investment Video' },
+      { type: 'image', url: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1200&q=80', badge: 'Drone Video' },
+      { type: 'image', url: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1200&q=80' },
+      { type: 'image', url: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1200&q=80' },
+      { type: '360', url: 'https://cdn.aframe.io/360-image-gallery-boilerplate/img/city.jpg' },
+    ],
+    coordinates: { lat: 40.7589, lng: -73.9851 },
     isFeatured: true,
     propertyType: "Residential",
     bedrooms: 3,
     bathrooms: 2,
     area: 2200,
+    expectedROI: 12.5,
+    rentalYield: 4.2,
+    appreciationRate: 8.3,
+    textHighlights: [
+      "YourOffice Denver offers ready-to-use fully serviced offices on flexible terms.",
+      "Get work done in a prestigious Class A office tower with on-site underground parking and access to RTD Light Rail and numerous bus lines a block away.",
+      "Within a 10-minute walk of 16th Street Mall, Paramount Theatre, The Ritz-Carlton, DPAC, Civic Center Park, and over 80 restaurants.",
+      "All-inclusive leases featuring high speed internet, reception services, fully equipped conference/meeting rooms, copiers, a kitchen, and more.",
+      "Located in the Central Business District with dozens of state offices, luxury hotels, courthouses and the Colorado Convention Center only blocks away.",
+      "Premium amenities including 24/7 security, high-speed elevators, and modern HVAC systems.",
+      "Flexible lease terms ranging from month-to-month to multi-year agreements.",
+      "Professional reception and mail handling services included in all packages.",
+      "State-of-the-art conference rooms with video conferencing capabilities.",
+      "On-site fitness center and wellness facilities for tenant use."
+    ],
+    availableSpaces: [
+      { id: 1, floor: "28th", suite: "2819", capacity: "1 - 4", size: 165, rentalRate: 808.50, spaceUse: "Office" },
+      { id: 2, floor: "28th", suite: "2824", capacity: "1 - 4", size: 160, rentalRate: 1262, spaceUse: "Office" },
+      { id: 3, floor: "28th", suite: "2832A", capacity: "1", size: 122, rentalRate: 607.56, spaceUse: "Office" },
+      { id: 4, floor: "28th", suite: "2836", capacity: "1 - 4", size: 196, rentalRate: 1707, spaceUse: "Office" },
+      { id: 5, floor: "28th", suite: "2860", capacity: "1 - 3", size: 202, rentalRate: 1794, spaceUse: "Office" },
+    ],
   },
   {
     id: 2,
@@ -880,6 +951,98 @@ export const caseStudies: CaseStudy[] = [
   },
 ];
 
+// Popular Cities
+export const popularCities: PopularCity[] = [
+  {
+    id: 1,
+    name: 'New York City',
+    state: 'New York',
+    imageUrl: 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=800&q=80',
+    propertyCount: 1247,
+    averagePrice: 1850000,
+    description: 'The financial capital with iconic skyline and endless opportunities',
+    isVisible: true,
+    order: 1,
+  },
+  {
+    id: 2,
+    name: 'Los Angeles',
+    state: 'California',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/e/e4/Skyline_of_Los_Angeles%2C_Downtown_Los_Angeles%2C_California_13.jpg',
+    propertyCount: 892,
+    averagePrice: 1650000,
+    description: 'Entertainment hub with luxury properties and coastal living',
+    isVisible: true,
+    order: 2,
+  },
+  {
+    id: 3,
+    name: 'Chicago',
+    state: 'Illinois',
+    imageUrl: 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=800&q=80',
+    propertyCount: 634,
+    averagePrice: 875000,
+    description: 'Architectural marvel with diverse neighborhoods and culture',
+    isVisible: true,
+    order: 3,
+  },
+  {
+    id: 4,
+    name: 'Washington D.C.',
+    state: 'District of Columbia',
+    imageUrl: 'https://images.unsplash.com/photo-1617581629397-a72507c3de9e?w=800&q=80',
+    propertyCount: 421,
+    averagePrice: 1250000,
+    description: 'Historic capital with prestigious properties and monuments',
+    isVisible: true,
+    order: 4,
+  },
+  {
+    id: 5,
+    name: 'Miami',
+    state: 'Florida',
+    imageUrl: 'https://images.unsplash.com/photo-1506966953602-c20cc11f75e3?w=800&q=80',
+    propertyCount: 567,
+    averagePrice: 1450000,
+    description: 'Tropical paradise with waterfront luxury and vibrant lifestyle',
+    isVisible: true,
+    order: 5,
+  },
+  {
+    id: 6,
+    name: 'San Francisco',
+    state: 'California',
+    imageUrl: 'https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=800&q=80',
+    propertyCount: 389,
+    averagePrice: 2100000,
+    description: 'Tech hub with stunning bay views and Victorian charm',
+    isVisible: true,
+    order: 6,
+  },
+  {
+    id: 7,
+    name: 'Boston',
+    state: 'Massachusetts',
+    imageUrl: 'https://cdn.sanity.io/images/nxpteyfv/goguides/1d183bd01f79e6048dce8852588a0bc951f89b75-1600x1066.jpg',
+    propertyCount: 312,
+    averagePrice: 1350000,
+    description: 'Historic city with world-class education and innovation',
+    isVisible: true,
+    order: 7,
+  },
+  {
+    id: 8,
+    name: 'Seattle',
+    state: 'Washington',
+    imageUrl: 'https://images.trvl-media.com/place/178307/74b030b2-80ee-45bf-9771-ebe736f0c7b1.jpg',
+    propertyCount: 445,
+    averagePrice: 1550000,
+    description: 'Emerald city with tech innovation and natural beauty',
+    isVisible: true,
+    order: 8,
+  },
+];
+
 // Helper functions to get data
 export function getHeroContent(): HeroContent {
   return heroContent;
@@ -923,4 +1086,8 @@ export function getCTASection(): CTASection {
 
 export function getMarqueeSettings(): MarqueeSettings {
   return marqueeSettings;
+}
+
+export function getPopularCities(): PopularCity[] {
+  return popularCities.filter(city => city.isVisible).sort((a, b) => a.order - b.order);
 }
