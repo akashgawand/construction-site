@@ -46,8 +46,8 @@ export default function AboutSection() {
                 transition={{ delay: 0.1 }}
                 className="text-4xl md:text-6xl lg:text-7xl font-serif font-light text-gray-900 leading-[1.1] mb-8"
               >
-                Crafting Spaces That <br />
-                <span className="italic text-gray-400">Define Excellence</span>
+                Your Gateway to <br />
+                <span className="italic text-gray-400">Smart Investments</span>
               </motion.h2>
 
               <motion.p
@@ -57,10 +57,10 @@ export default function AboutSection() {
                 transition={{ delay: 0.2 }}
                 className="text-xl text-gray-600 leading-relaxed mb-10 font-light"
               >
-                With over two decades of experience in architectural development
-                and construction, we transform visions into enduring landmarks.
-                Every project is a testament to precision, innovation, and
-                timeless design.
+                We connect investors with premium real estate opportunities
+                across the nation. Our curated marketplace features high-yield
+                properties, from commercial spaces to luxury residences, all
+                vetted for maximum returns and long-term value.
               </motion.p>
 
               <motion.a
@@ -70,7 +70,7 @@ export default function AboutSection() {
                 href="#contact"
                 className="group inline-flex items-center gap-4 text-gray-900 font-medium tracking-wide uppercase text-sm border-b border-gray-900 pb-1 hover:text-gray-600 hover:border-gray-600 transition-all"
               >
-                Discover Our Story
+                Explore Opportunities
                 <ArrowRight
                   size={16}
                   className="transition-transform group-hover:translate-x-2"
@@ -88,8 +88,8 @@ export default function AboutSection() {
                 className="aspect-[3/4] md:aspect-[4/5] overflow-hidden"
               >
                 <img
-                  src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=2053&auto=format&fit=crop"
-                  alt="Interior Architecture"
+                  src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=2073&auto=format&fit=crop"
+                  alt="Premium Real Estate Investment"
                   className="w-full h-full object-cover"
                 />
               </motion.div>
@@ -102,8 +102,8 @@ export default function AboutSection() {
                 className="absolute -bottom-8 -left-8 md:left-8 bg-gray-900 p-8 text-white max-w-xs shadow-2xl"
               >
                 <p className="font-serif text-2xl italic leading-tight">
-                  "Architecture starts when you carefully put two bricks
-                  together."
+                  "Real estate is not about buildings, it's about creating
+                  lasting wealth."
                 </p>
               </motion.div>
             </div>
